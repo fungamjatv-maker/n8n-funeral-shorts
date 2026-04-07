@@ -1,0 +1,151 @@
+{
+  "name": "Funeral Shorts Auto Pipeline (Fixed)",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "1",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        200,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "topic",
+              "value": "A respectful memorial short about remembrance and healing"
+            },
+            {
+              "name": "imagePrompt1",
+              "value": "Photorealistic documentary-style image of a peaceful memorial hall with soft natural light, real camera lens depth of field, lifelike textures, realistic skin tones, no illustration, no CGI, ultra-detailed realism"
+            },
+            {
+              "name": "imagePrompt2",
+              "value": "Photorealistic scene of diverse family members sharing memories near white flowers, natural lighting, true-to-life proportions, realistic clothing wrinkles, real-world color grading, no cartoon style, no digital art"
+            },
+            {
+              "name": "imagePrompt3",
+              "value": "Photorealistic close-up of a condolence card and candle on wooden table, realistic shadows, macro lens realism, true material textures, high dynamic range realism, no painting style"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2",
+      "name": "Set Prompts",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        420,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "functionCode": "const topic = $json.topic;\nconst script = `Opening: ${topic}.\nMiddle: Share a comforting memory and practical support message.\nClosing: Encourage viewers to honor loved ones with kindness today.`;\nreturn [{ json: { ...$json, script } }];"
+      },
+      "id": "3",
+      "name": "Build Script",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 2,
+      "position": [
+        650,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "command": "ffmpeg -y -framerate 1 -i /data/frames/frame_%03d.png -i /data/audio/voiceover.mp3 -c:v libx264 -pix_fmt yuv420p -shortest /data/output/funeral_shorts.mp4"
+      },
+      "id": "4",
+      "name": "Execute Command - Render Video",
+      "type": "n8n-nodes-base.executeCommand",
+      "typeVersion": 1,
+      "position": [
+        900,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "status",
+              "value": "ready"
+            },
+            {
+              "name": "outputFile",
+              "value": "/data/output/funeral_shorts.mp4"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5",
+      "name": "Finalize Metadata",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        1140,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Prompts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Prompts": {
+      "main": [
+        [
+          {
+            "node": "Build Script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Script": {
+      "main": [
+        [
+          {
+            "node": "Execute Command - Render Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute Command - Render Video": {
+      "main": [
+        [
+          {
+            "node": "Finalize Metadata",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "pinData": {},
+  "versionId": "fixed-2026-04-07"
+}
